@@ -1,4 +1,4 @@
-# ansible-router - repo is WIP - project complete, but need to upload files ETA Oct 1st
+# ansible-router - repo is WIP - project complete, but need to upload files ETA Oct 1st,2023
 The purpose of this repository is to build a linux router for a home network and to manage it with Ansible.
 
 # Motivation
