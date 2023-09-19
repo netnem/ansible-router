@@ -6,22 +6,23 @@ I originally had an Ubiquiti ER-X router that I used for several years.  I loved
 
 VyOS 1.4 was a close fit, but I was ultimately annoyed by their rolling-releases. I ended up compiling v1.3 LTS and it was missing features that I needed (such as being able to write an ACLs that were bigger than a /24).  
 
-I realized that my home router isn't really that complicated and once my home router was setup, I generally never touch it.  There was no reason for me to not set up these services manually using idempotency. Full control over which features get installed, and updating the router is as simple as running apt-get.  
+I realized that my home router isn't really that complicated and once my home router was setup, I generally never touch it.  There was no reason for me to not set up these services manually using Ansible idempotent configuration. I get full control over which features/utilities that get installed, and updating the router is as simple as running apt update.  
 
 I also liked the idea of not being bound to any specific architecture (x86 vs ARM).  While I haven't tested on ARM, as long as the packages are available, this should work.
 
 Thus this project was born.  
 
 # Requirements
-- A device that has two ethernet ports.
+- A device that has two ethernet ports. 
 - Ansible-vault knowledge for maintaining your passwords.
-- Jinja2 knowledge - where the magic happens.
+- Jinja2 knowledge for customization of the config files that will get pushed to the device.
 
 # Layout
 
 The top-level playbook "build_linux_router.yml" will perform the following:
   - Create a dynamic inventory so that it can be ran against any IP address as an extra_var
   - Set up the connection for the role to work correctly, including pulling in the path for /sbin
+  - Call the role "build-linux-router"
 
 Next the playbook will pull in roles/main.yml as the next task.  The main.yml's sole purpose is to call additional tasks.  I've labeled them in order of operation by prefixing them with numbers.  This playbook is meant to have every task read and be personalized.  For example, you may not want to PermitRootLogin, so you would want to change the option in 0-gather_variables.yml
 
@@ -40,8 +41,18 @@ Outside of the tasks folder, we have:
 - vault_password.sh will reference an environment variable $MYPASS -- configure this in ~/.profile at the top with an export command such as: "export MYPASS=123456789"
 
 
+  # Results
+  GRC Shields up should result with all ports being "Stealth"
+  ![image](https://github.com/netnem/ansible-router/assets/32517635/f2f21b25-0b67-413a-8240-b37e24d237f1)
+
+  The hardware I'm running on is a fitlet2 (Intel Celeron J3455.  Easily caps out my 1G connection:
+
+  ![image](https://github.com/netnem/ansible-router/assets/32517635/25fd4649-29fa-4a10-9376-eeab30f76631)
+
   
   
+
+
 
 
 
