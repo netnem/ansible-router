@@ -8,4 +8,40 @@ VyOS 1.4 was a close fit, but I was ultimately annoyed by their rolling-releases
 
 I realized that my home router isn't really that complicated and once my home router was setup, I generally never touch it.  There was no reason for me to not set up these services manually using idempotency. Full control over which features get installed, and updating the router is as simple as running apt-get.  
 
+I also liked the idea of not being bound to any specific architecture (x86 vs ARM).  While I haven't tested on ARM, as long as the packages are available, this should work.
+
 Thus this project was born.  
+
+# Requirements
+- A device that has two ethernet ports.
+- Ansible-vault knowledge for maintaining your passwords.
+- Jinja2 knowledge - where the magic happens.
+
+# Layout
+
+The top-level playbook "build_linux_router.yml" will perform the following:
+  - Create a dynamic inventory so that it can be ran against any IP address as an extra_var
+  - Set up the connection for the role to work correctly, including pulling in the path for /sbin
+
+Next the playbook will pull in roles/main.yml as the next task.  The main.yml's sole purpose is to call additional tasks.  I've labeled them in order of operation by prefixing them with numbers.  This playbook is meant to have every task read and be personalized.  For example, you may not want to PermitRootLogin, so you would want to change the option in 0-gather_variables.yml
+
+0-gather_varibles.yml - This was originally designed to gather variables as a sort of "pre-task."  
+1-install packages.yml - Self-explanatory
+2-configure basic routing.yml - IP forwarding options, and copy network interface config, DNS, and Firewall options to the proper location.
+3-install custom services.yml - Optional services that are not required for a basic router.  Example: Setting up Dynamic DNS client.
+4-ansible-pull setup.yml - this is an example of using ansible-pull to automatically update your router once you push the config to a git-repository.  Likely OK to comment this out for most users.
+5-Restart services.yml - Restart any service if there were any changes made to that service.
+
+Outside of the tasks folder, we have:
+- templates, which hosts all of the files that will be copied to the appropiate linux path.  This is where each service will pull its config from.
+- vars/main/xxx.yml - this is how you'll manage the router on a day to day basis.  If you need to add a port forward, you'll update port_forward.yml  DHCP/DNS/Port Forwards/Routes and Firewall source-ip filters are maintained here.
+- Also be aware of groups_var/all/vars.yml and vault.yml.  The variables are set in vars.yml and vault.yml is secured with ansible-vault. (Unlock the vault with "ansible-vault decrypt group_vars/all/vault.yml" and reencrypt with "ansible-vault encrypt group_vars/all/vault.yml"
+- Please be aware of the ansible.cfg file.  This is what sets the playbook default vault and the vaults password.  Notice that it calls vault_password.sh
+- vault_password.sh will reference an environment variable $MYPASS -- configure this in ~/.profile at the top with an export command such as: "export MYPASS=123456789"
+
+
+  
+  
+
+
+
