@@ -26,12 +26,12 @@ The top-level playbook "build_linux_router.yml" will perform the following:
 
 Next the playbook will pull in roles/main.yml as the next task.  The main.yml's sole purpose is to call additional tasks.  I've labeled them in order of operation by prefixing them with numbers.  This playbook is meant to have every task read and be personalized.  For example, you may not want to PermitRootLogin, so you would want to change the option in 0-gather_variables.yml
 
-0-gather_varibles.yml - This was originally designed to gather variables as a sort of "pre-task."  
-1-install packages.yml - Self-explanatory
-2-configure basic routing.yml - IP forwarding options, and copy network interface config, DNS, and Firewall options to the proper location.
-3-install custom services.yml - Optional services that are not required for a basic router.  Example: Setting up Dynamic DNS client.
-4-ansible-pull setup.yml - this is an example of using ansible-pull to automatically update your router once you push the config to a git-repository.  Likely OK to comment this out for most users.
-5-Restart services.yml - Restart any service if there were any changes made to that service.
+- 0-gather_varibles.yml - This was originally designed to gather variables as a sort of "pre-task."  
+- 1-install packages.yml - Self-explanatory
+- 2-configure basic routing.yml - IP forwarding options, and copy network interface config, DNS, and Firewall options to the proper location.
+- 3-install custom services.yml - Optional services that are not required for a basic router.  Example: Setting up Dynamic DNS client.
+- 4-ansible-pull setup.yml - this is an example of using ansible-pull to automatically update your router once you push the config to a git-repository.  Likely OK to comment this out for most users.
+- 5-Restart services.yml - Restart any service if there were any changes made to that service.
 
 Outside of the tasks folder, we have:
 - templates, which hosts all of the files that will be copied to the appropiate linux path.  This is where each service will pull its config from.
