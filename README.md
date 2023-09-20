@@ -52,8 +52,7 @@ Outside of the tasks folder, we have:
 
 # Playbook Results 
   Please note, the vault username and password must be updated to correct credentials:
-  Also note: the final task "restart networking service" will timeout the first time it is ran .  This is because the playbook will change the lan_ip of the target_host device. You would need to rerun the playbook with the new lan_ip for managing it.
-  Tested against debian 12 virtual machine:
+  Tested against Debian 12 Bookworm virtual machine:
 
 ```
 dan@dans:~/ansible-router$ ansible-playbook build_linux_router.yml -e target_host=192.168.3.102
