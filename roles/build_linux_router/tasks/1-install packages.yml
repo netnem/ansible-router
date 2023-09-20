@@ -3,73 +3,29 @@
     update_cache: yes
   changed_when: false
 
-- name: Install sudo 
+- name: Install packages 
   apt:
-    name: sudo
-    state: present
-
+    pkg: 
+      - sudo
+      - vlan
+      - dnsmasq
+      - ddclient
+      - iptables
+      - iptables-persistent
+      - tcpdump
+      - net-tools
+      - python3-pexpect #pre-requisite for restarting iptables with expect
+      - curl
+      - nmap
+      - dnsutils
+      - snmp
+      - snmpd
+    
 - name: add user to sudoers
   lineinfile:
     path: /etc/sudoers
     line: "{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL"
     insertafter: "%sudo ALL=(ALL:ALL) ALL"
-    state: present
-
-- name: Install vlan support
-  apt:
-    name: vlan
-    state: present
-
-- name: Install dnsmasq
-  apt:
-    name: dnsmasq
-    state: present
-
-- name: Install ddclient
-  apt:
-    name: ddclient
-    state: present
-
-- name: Install iptables
-  apt:
-    name: iptables
-    state: present
-
-- name: Install iptables iptables-persistent
-  apt:
-    name: iptables-persistent
-    state: present
-
-#pre-requisites for restarting iptables with expect
-
-- name: Install python3-pexpect
-  apt:
-    name: python3-pexpect
-    state: present
-
-- name: Install curl
-  apt:
-    name: curl
-    state: present
-
-- name: Install nmap
-  apt:
-    name: nmap
-    state: present
-
-- name: Install dnstools
-  apt:
-    name: dnsutils
-    state: present
-
-- name: Install snmp
-  apt:
-    name: snmp
-    state: present
-
-- name: Install snmpd
-  apt:
-    name: snmpd
     state: present
 
 - name: Add community to snmpd
@@ -102,12 +58,3 @@
     state: absent
   register: snmpd_update4
 
-- name: Install tcpdump
-  apt:
-    name: tcpdump
-    state: present
-
-- name: install net-tools
-  apt:
-    name: net-tools
-    state: present
