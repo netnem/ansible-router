@@ -1,0 +1,16 @@
+server={{ dns1 }}
+server={{ dns2 }}
+
+# Add domains which you want to force to an IP address here.
+{% for host, ip in dns_entries.items() -%}
+address=/{{ host }}/{{ ip }}
+{% endfor %}
+
+#set dhcp range and router gateway
+dhcp-range=192.168.1.150,192.168.1.254,255.255.255.0,12h
+dhcp-option=3,192.168.1.1
+
+{% for device in dhcp_reservations -%}
+dhcp-host={{ device.mac }},{{ device.name }},{{ device.ip }},infinite
+{% endfor %}
+

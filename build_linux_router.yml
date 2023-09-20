@@ -1,0 +1,51 @@
+---
+- hosts: localhost
+  connection: local
+  ignore_unreachable: no
+  gather_facts: no
+    
+#pretasks for this playbook to work is container must be made, and user must be created. container must have a management ip for ansible to reach, you will need a gateway for first run, but can be removed later.
+
+  tasks:
+      - name: add hosts from extra-vars to "temp" group
+        add_host:
+          hostname: "{{ target_host }}"
+          groups: temp
+        
+#start the second play to include /sbin#see https://github.com/ansible/ansible/issues/14655#issuecomment-217084980
+- hosts: temp
+  vars:
+      ansible_become_method: su 
+      ansible_become_pass: "{{ sudo_password }}"
+      ansible_ssh_user: "{{ username }}"
+      ansible_ssh_pass: "{{ password }}"
+      ansible_timeout: 45
+  tasks:
+    - command: echo "$PATH"
+      register: default_path
+      become: yes
+      changed_when: false
+
+#start the third play
+- name: Include Role for temp group
+  hosts: temp
+  ignore_unreachable: no
+  gather_facts: yes
+  environment:
+    PATH: "{{ default_path.stdout }}:/sbin"
+  vars:
+    ansible_become_method: su 
+    ansible_become_pass: "{{ sudo_password }}"
+    ansible_ssh_user: "{{ username }}"
+    ansible_ssh_pass: "{{ password }}"
+    ansible_timeout: 45
+
+  tasks:
+  #run the role with become: yes
+      - include_role:
+          name: build_linux_router
+          apply:
+            become: yes
+
+
+

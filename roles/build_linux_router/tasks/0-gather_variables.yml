@@ -1,0 +1,35 @@
+- name: Get IP of my_dynamic_ddns_host
+  set_fact:
+    my_ddns_ip: "{{ lookup('pipe', 'dig +short google.com') }}/32"
+
+- name: print iptables.j2
+  debug:
+    msg: "{{ lookup('template', 'iptables.j2') }}"
+
+- name: print interfaces.j2
+  debug:
+    msg: "{{ lookup('template', 'interfaces.j2') }}"
+
+- name: print dnsmasq.j2
+  debug:
+    msg: "{{ lookup('template', 'dnsmasq.j2') }}"
+
+- name: print ddclient.j2
+  debug:
+    msg: "{{ lookup('template', 'ddclient.j2') }}"
+
+- name: allow root login for debian machines
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin yes'
+  changed_when: false
+  #changed_when: false because this will always be a true statement
+  register: root_login
+
+- name: Remove deb cdrom from sources.list
+  lineinfile:
+    path: /etc/apt/sources.list
+    regexp: '^deb cdrom:'
+    state: absent
+  register: remove_deb_cdrom

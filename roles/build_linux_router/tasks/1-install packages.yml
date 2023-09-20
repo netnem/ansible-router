@@ -1,0 +1,113 @@
+- name: update apt
+  apt:
+    update_cache: yes
+  changed_when: false
+
+- name: Install sudo 
+  apt:
+    name: sudo
+    state: present
+
+- name: add user to sudoers
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL"
+    insertafter: "%sudo ALL=(ALL:ALL) ALL"
+    state: present
+
+- name: Install vlan support
+  apt:
+    name: vlan
+    state: present
+
+- name: Install dnsmasq
+  apt:
+    name: dnsmasq
+    state: present
+
+- name: Install ddclient
+  apt:
+    name: ddclient
+    state: present
+
+- name: Install iptables
+  apt:
+    name: iptables
+    state: present
+
+- name: Install iptables iptables-persistent
+  apt:
+    name: iptables-persistent
+    state: present
+
+#pre-requisites for restarting iptables with expect
+
+- name: Install python3-pexpect
+  apt:
+    name: python3-pexpect
+    state: present
+
+- name: Install curl
+  apt:
+    name: curl
+    state: present
+
+- name: Install nmap
+  apt:
+    name: nmap
+    state: present
+
+- name: Install dnstools
+  apt:
+    name: dnsutils
+    state: present
+
+- name: Install snmp
+  apt:
+    name: snmp
+    state: present
+
+- name: Install snmpd
+  apt:
+    name: snmpd
+    state: present
+
+- name: Add community to snmpd
+  lineinfile:
+    dest: /etc/snmp/snmpd.conf
+    line: "rocommunity {{ password }}"
+    insertafter: "rocommunity  public default -V systemonly"
+    state: present
+  register: snmpd_update
+
+- name: Remove v4 SNMP string from snmpd.conf
+  lineinfile:
+    path: /etc/snmp/snmpd.conf
+    line: 'rocommunity public default -V systemonly'
+    state: absent
+  register: snmpd_update2
+
+- name: Replace agentaddress with publically accessible
+  lineinfile:
+    path: /etc/snmp/snmpd.conf
+    regexp: '^agentaddress'
+    line: 'agentaddress udp:161'
+    state: present
+  register: snmpd_update3
+
+- name: remove v6 SNMP string from snmpd.conf
+  lineinfile:
+    path: /etc/snmp/snmpd.conf
+    line: 'rocommunity6 public default -V systemonly'
+    state: absent
+  register: snmpd_update4
+
+- name: Install tcpdump
+  apt:
+    name: tcpdump
+    state: present
+
+- name: install net-tools
+  apt:
+    name: net-tools
+    state: present

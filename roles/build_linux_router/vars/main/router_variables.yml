@@ -1,0 +1,9 @@
+lan_interface: enp6s18
+wan_interface: enp6s19
+#uncomment if WAN uses a vlan, the j2 file will adapt as necessary
+wan_vlan_id: 201
+lan_ip_with_mask: 192.168.1.1/24
+dns1: 1.1.1.1
+dns2: 8.8.8.8
+
+

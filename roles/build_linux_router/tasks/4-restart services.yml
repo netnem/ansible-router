@@ -1,0 +1,44 @@
+- name: restart /etc/sysctl.conf
+  shell: sysctl -p
+  when: net_ipv4_ip_forward.changed or net_ipv6_conf_all_forwarding.changed
+
+- name: Start ddclient service
+  service:
+    name: ddclient
+    state: restarted
+  when: ddclient_update.changed
+
+- name: restart dnsmasq service
+  service:
+    name: dnsmasq
+    state: restarted
+  when: dnsmasq_update.changed
+
+- name: apply new IP tables rules
+  expect:
+    command: iptables-apply /etc/iptables/rules.v4
+    responses:
+      (?i)Can you establish NEW connections to the machine?: Y"
+  when: rules_v4_update.changed
+
+- name: Restart snmpd
+  service:
+    name: snmpd
+    state: restarted
+  when: snmpd_update.changed or snmpd_update2.changed or snmpd_update3.changed or snmpd_update4.changed
+
+- name: restart sshd for debian machines
+  service:
+    name: sshd
+    state: restarted
+  when: root_login.changed
+
+#this needs to be last
+- name: restart networking service
+  ignore_errors: yes
+  service:
+    name: networking
+    state: restarted
+  async: 10
+  poll: 0
+  when: interfaces_update.changed

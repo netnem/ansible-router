@@ -1,0 +1,5 @@
+- name: Configure ddclient (Dynamic DNS)
+  template:
+      src: ddclient.j2
+      dest: /etc/ddclient.conf
+  register: ddclient_update

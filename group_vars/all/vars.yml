@@ -1,0 +1,4 @@
+username: "{{ vault_username }}"
+password: "{{ vault_password }}"
+sudo_password: "{{ vault_sudo_password }}"
+cloudflare_api_token: "{{ vault_cloudflare_api_token }}"

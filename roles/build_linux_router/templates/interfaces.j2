@@ -1,0 +1,16 @@
+#jinja2: trim_blocks:False
+
+auto lo
+iface lo inet loopback
+
+auto {{ lan_interface }}
+iface {{ lan_interface }} inet static
+        address {{ lan_ip_with_mask }}
+        {% for subnet,destination_ip in lan_routes.items()  -%}
+        up ip route add {{ subnet }} via {{ destination_ip }}
+        {% endfor %}
+
+
+auto {{ wan_interface }}{% if wan_vlan_id is defined %}.{{ wan_vlan_id }}{% endif %}
+iface {{ wan_interface }}{% if wan_vlan_id is defined %}.{{ wan_vlan_id }}{% endif %} inet dhcp
+        dns-nameservers {{dns1}},{{dns2}}

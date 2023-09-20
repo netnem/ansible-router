@@ -1,0 +1,9 @@
+#jinja2: trim_blocks:False
+use=if, if={{ wan_interface }}{% if wan_vlan_id is defined %}.{{ wan_vlan_id }}{% endif %}
+protocol=cloudflare, \
+zone=mydomain.com, \
+ttl=1,
+ssl=yes, \
+login=token \
+password='{{ cloudflare_api_token }}' \
+mydomain.com

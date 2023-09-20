@@ -1,0 +1,79 @@
+#jinja2: trim_blocks:False
+
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+
+# {{ wan_interface }}{% if wan_vlan_id is defined %}.{{ wan_vlan_id }}{% endif %} is WAN interface, {{ lan_interface }} is LAN interface
+-A POSTROUTING -o {{ wan_interface }}{% if wan_vlan_id is defined %}.{{ wan_vlan_id }}{% endif %} -j MASQUERADE
+
+# NAT pinhole: HTTP from WAN to LAN
+
+{% for port in port_forwards | dict2items -%}
+-A PREROUTING -p tcp -m tcp -i {{ wan_interface }}{% if wan_vlan_id is defined %}.{{ wan_vlan_id }}{% endif %} --source {% for source, value in source_ip_filter.items() %}{% if value != '/32' %}{{ value }}{% endif %}{% if not loop.last %},{% endif %}{% endfor %} --dport {{ port.key }} -m conntrack --ctstate NEW -j DNAT --to-destination {{ port.value }}
+{% endfor %}
+
+COMMIT
+
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Service rules
+
+# basic global accept rules - ICMP, loopback, traceroute, established all accepted
+-A INPUT -s 127.0.0.0/8 -d 127.0.0.0/8 -i lo -j ACCEPT
+
+#allow ping from inside to outside
+-A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+-A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
+
+# accept all ping from LAN
+-A INPUT -i {{ lan_interface }} -p icmp -j ACCEPT
+
+-A INPUT -m state --state ESTABLISHED -j ACCEPT
+
+# DNS - accept from LAN
+-A INPUT -i {{ lan_interface }} -p tcp --dport 53 -j ACCEPT
+-A INPUT -i {{ lan_interface }} -p udp --dport 53 -j ACCEPT
+
+# SSH - accept from LAN
+-A INPUT -i {{ lan_interface }} -p tcp --dport 22 -j ACCEPT
+
+# SNMP - accept from LAN
+-A INPUT -i {{ lan_interface }} -p udp --dport 161 -j ACCEPT
+
+# DHCP client requests - accept from LAN
+-A INPUT -i {{ lan_interface }} -p udp --dport 67:68 -j ACCEPT
+
+# PING - Accept from LAN
+-A INPUT -i {{ lan_interface }} -p icmp -j ACCEPT
+
+# drop all other inbound traffic
+-A INPUT -j DROP
+
+# Forwarding rules
+
+# forward packets along established/related connections
+-A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# forward from LAN ({{ lan_interface }}) to WAN ({{ wan_interface }})
+-A FORWARD -i {{ lan_interface }} -o {{ wan_interface }}{% if wan_vlan_id is defined %}.{{ wan_vlan_id }}{% endif %} -j ACCEPT
+
+# forward all LAN to LAN 
+-A FORWARD -i {{ lan_interface }} -o {{ lan_interface }} -j ACCEPT
+
+# allow traffic from our NAT pinhole
+
+#allow specific source_ips to reach the port forwarded ips and ports (happens after NAT) 
+{% for port, dest_ip in port_forwards.items() -%}
+-A FORWARD -p tcp --source {% for source, value in source_ip_filter.items() %}{% if value != '/32' %}{{ value }}{% endif %}{% if not loop.last %},{% endif %}{% endfor %} -d {{ dest_ip.split(':')[0] }} --dport {{ dest_ip.split(':')[1] }} -j ACCEPT
+{% endfor %}
+
+# drop all other forwarded traffic
+-A FORWARD -j DROP
+
+COMMIT

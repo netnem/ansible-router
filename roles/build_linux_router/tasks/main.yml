@@ -1,0 +1,16 @@
+- name: debug
+  include_tasks: 0-gather_variables.yml
+
+- name: Install packages
+  include_tasks: 1-install packages.yml
+
+- name: Configure basic routing
+  include_tasks: 2-configure basic routing.yml
+
+- name: install custom services.yml
+  include_tasks: 3-install custom services.yml
+
+- name: restart services.yml
+  include_tasks: 4-restart services.yml
+
+

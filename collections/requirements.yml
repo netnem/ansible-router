@@ -1,0 +1,9 @@
+---
+collections:
+  - name: ansible.netcommon
+  
+  - name: community.network
+    type: galaxy
+
+  - name: community.general
+    type: galaxy

@@ -1,0 +1,31 @@
+- name: Set net.ipv4.ip_forward to 1
+  lineinfile:
+    path: /etc/sysctl.conf
+    regexp: '^net.ipv4.ip_forward'
+    line: 'net.ipv4.ip_forward=1'
+  register: net_ipv4_ip_forward
+  
+- name: Set net.ipv6.conf.all.forwarding to 1
+  lineinfile:
+    path: /etc/sysctl.conf
+    regexp: '^net.ipv6.conf.all.forwarding=1'
+    line: 'net.ipv6.conf.all.forwarding=1'
+  register: net_ipv6_conf_all_forwarding
+
+- name: Replace /etc/network/interfaces with a template
+  template:
+      src: interfaces.j2
+      dest: /etc/network/interfaces
+  register: interfaces_update
+
+- name: Replace /etc/dnsmasq with a template
+  template:
+      src: dnsmasq.j2
+      dest: /etc/dnsmasq.conf
+  register: dnsmasq_update
+
+- name: Replace /etc/iptables/rules.v4 with a template
+  template:
+      src: iptables.j2
+      dest: /etc/iptables/rules.v4
+  register: rules_v4_update
