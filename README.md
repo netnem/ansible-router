@@ -24,7 +24,7 @@ The top-level playbook "build_linux_router.yml" will perform the following:
   - Set up the connection for the role to work correctly, including pulling in the path for /sbin
   - Call the role "build-linux-router"
 
-Next the playbook will pull in roles/main.yml as the next task.  The main.yml's sole purpose is to call additional tasks.  I've labeled them in order of operation by prefixing them with numbers.  This playbook is meant to have every task read and be personalized.  For example, you may not want to PermitRootLogin, so you would want to change the option in 0-gather_variables.yml
+Next, the playbook will pull in roles/main.yml as the next task.  The main.yml's sole purpose is to call additional tasks.  I've labeled them in order of operation by prefixing them with numbers.  This playbook is meant to have every task read and be personalized.  For example, you may not want to PermitRootLogin, so you would want to change the option in 0-gather_variables.yml
 
 - 0-gather_varibles.yml - This was originally designed to gather variables as a sort of "pre-task."  
 - 1-install packages.yml - Self-explanatory
@@ -37,7 +37,8 @@ Outside of the tasks folder, we have:
 - vars/main/xxx.yml - this is how you'll manage the router on a day to day basis.  If you need to add a port forward, you'll update port_forward.yml  DHCP/DNS/Port Forwards/Routes and Firewall source-ip filters are maintained here.
 - Also be aware of groups_var/all/vars.yml and vault.yml.  The variables are set in vars.yml and vault.yml is secured with ansible-vault. (Unlock the vault with "ansible-vault decrypt group_vars/all/vault.yml" and reencrypt with "ansible-vault encrypt group_vars/all/vault.yml"
 - Please be aware of the ansible.cfg file.  This is what sets the playbook default vault and the vaults password.  Notice that it calls vault_password.sh
-- vault_password.sh will reference an environment variable $MYPASS -- configure this in ~/.profile at the top with an export command such as: "export MYPASS=123456789"
+- vault_password.sh will reference an environment variable $MYPASS -- configure this in ~/.profile at the top with an export command such as: "export MYPASS=123456789" and remove the export statement from vault_password.sh
+- Alternatively, decrypt the current vault with the default password in vault_password.sh, and then change it to something unique.  Then reencrypt the vault.  You really should use environmental variables here for security reasons.
 
 
 # Router Results
